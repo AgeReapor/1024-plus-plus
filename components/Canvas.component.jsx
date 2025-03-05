@@ -1,11 +1,8 @@
 import { StyleSheet } from "react-native";
-import Animated, {
-	useAnimatedStyle,
-	useAnimatedRef,
-} from "react-native-reanimated";
+import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import * as style from "../utils/StyleUtilClasses";
 import calcGridCoords from "../utils/CalcGridCoords";
-import Tile from "./Tile";
+import Tile from "./Tile.component";
 import { useEffect } from "react";
 
 const CANVAS_SIZE = 350;
@@ -25,7 +22,7 @@ export default function Canvas() {
 		};
 	});
 
-	useEffect(() => {}, [bgAnimStyles]);
+	useEffect(() => {}, []);
 
 	return (
 		<Animated.View style={[stylesheet.canvas, canvasAnimStyles]}>

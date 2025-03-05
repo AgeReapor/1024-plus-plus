@@ -1,12 +1,29 @@
+import { useEffect } from "react";
 import { StyleSheet } from "react-native";
 import Animated, {
+	cancelAnimation,
+	Easing,
 	interpolate,
 	interpolateColor,
+	ReduceMotion,
 	useAnimatedStyle,
+	withRepeat,
+	withSequence,
 	withTiming,
+	useSharedValue,
 } from "react-native-reanimated";
 
 export default function Tile(props) {
+	const scale = useSharedValue(1);
+	const opacity = useSharedValue(1);
+
+	useEffect(() => {
+		scale.value = 1.5;
+		setTimeout(() => {
+			scale.value = 1;
+		}, 100);
+	}, [props.val]);
+
 	const tileAnimStyles = useAnimatedStyle(() => {
 		return {
 			backgroundColor: withTiming(
@@ -17,8 +34,9 @@ export default function Tile(props) {
 				)
 			),
 			transform: [
-				{ translateX: withTiming(props.x) },
-				{ translateY: withTiming(props.y) },
+				{ translateX: withTiming(props.x, translateConfig) },
+				{ translateY: withTiming(props.y, translateConfig) },
+				{ scale: withTiming(scale.value, scaleConfig) },
 			],
 			width: props.size,
 			height: props.size,
@@ -82,3 +100,17 @@ const textColors = [
 ];
 
 const fontSizes = [48, 40, 34, 34];
+
+const translateConfig = {
+	duration: 300,
+	easing: Easing.inOut(Easing.quad),
+	// reduceMotion: ReduceMotion.System,
+};
+
+const scaleConfig = {
+	duration: 100,
+	easing: Easing.inOut(Easing.quad),
+	// reduceMotion: ReduceMotion.System,
+};
+
+const pulseAnim = {};

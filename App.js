@@ -10,8 +10,8 @@ import { StyleSheet } from "react-native";
 import { useState } from "react";
 
 import * as style from "./utils/StyleUtilClasses";
-import Tile from "./components/Tile";
-import Canvas from "./components/Canvas";
+import Canvas from "./components/Canvas.component";
+import Tile from "./components/Tile.component";
 
 const CANVAS_SIZE = 350;
 const TILE_SIZE = 80;
@@ -72,10 +72,10 @@ export default function App() {
 					stylesheet.toolbar,
 				]}
 			>
-				<Button title="Up"></Button>
-				<Button title="Down"></Button>
-				<Button title="Left"></Button>
-				<Button title="Right"></Button>
+				<Button title="Spawn"></Button>
+				<Button title="Delete"></Button>
+				<Button title="Hidden"></Button>
+				<Button title="Slide"></Button>
 			</Animated.View>
 		</Animated.View>
 	);
@@ -91,3 +91,11 @@ const stylesheet = StyleSheet.create({
 	},
 	toolbar: {},
 });
+
+const onSpawn = () => {};
+
+const onDelete = () => {};
+
+const onSlide = () => {};
+
+const onHidden = () => {};
