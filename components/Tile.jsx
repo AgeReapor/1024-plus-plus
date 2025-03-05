@@ -1,12 +1,14 @@
 import { StyleSheet } from "react-native";
 import Animated, {
+	interpolate,
 	interpolateColor,
 	useAnimatedStyle,
 	withTiming,
+	withSpring,
 } from "react-native-reanimated";
 
 export default function Tile(props) {
-	const animStyles = useAnimatedStyle(() => {
+	const tileAnimStyles = useAnimatedStyle(() => {
 		return {
 			backgroundColor: withTiming(
 				interpolateColor(
@@ -14,9 +16,6 @@ export default function Tile(props) {
 					[2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048],
 					tileColors
 				)
-			),
-			color: withTiming(
-				interpolateColor(props.val, [2, 4, 8, 2048], textColors)
 			),
 			transform: [
 				{ translateX: withTiming(props.x) },
@@ -27,9 +26,18 @@ export default function Tile(props) {
 		};
 	});
 
+	const textAnimStyles = useAnimatedStyle(() => {
+		return {
+			color: withTiming(interpolateColor(props.val, [4, 8], textColors)),
+			fontSize: interpolate(props.val, [16, 256, 1024, 2048], fontSizes),
+		};
+	});
+
 	return (
-		<Animated.View style={[sheet.tile, animStyles]}>
-			<Animated.Text>{props.val}</Animated.Text>
+		<Animated.View style={[sheet.tile, tileAnimStyles]}>
+			<Animated.Text style={[sheet.text, textAnimStyles]}>
+				{props.val}
+			</Animated.Text>
 		</Animated.View>
 	);
 }
@@ -42,11 +50,13 @@ const sheet = StyleSheet.create({
 		justifyContent: "center",
 		alignItems: "center",
 
-		fontWeight: "bold",
-
 		// Anchor center of the tile
 		// marginLeft: -SIDE / 2,
 		// marginTop: -SIDE / 2,
+	},
+	text: {
+		fontFamily: "notoserif",
+		fontWeight: "700",
 	},
 });
 
@@ -66,7 +76,9 @@ const tileColors = [
 
 const textColors = [
 	"#776e65", // 2 onwards
-	"#776e65",
+	// "#776e65",
 	"#f8f3ee", // 8 onwards
-	"#f8f3ee",
+	// "#f8f3ee",
 ];
+
+const fontSizes = [48, 40, 34, 34];
