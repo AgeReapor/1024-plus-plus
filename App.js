@@ -13,13 +13,13 @@ import * as style from "./utils/StyleUtilClasses";
 import Tile from "./components/Tile";
 
 const CANVAS_SIZE = 350;
-const TILE_SIZE = 60;
+const TILE_SIZE = 80;
 
 export default function App() {
 	const [state, setState] = useState({
 		x: 0,
 		y: 0,
-		val: 1,
+		val: 2,
 	});
 
 	return (
@@ -40,7 +40,7 @@ export default function App() {
 					title="Change Position"
 					onPress={() => {
 						var newVal = state.val * 2;
-						if (newVal >= 2048) newVal = 1;
+						if (newVal > 2048) newVal = 2;
 
 						setState({
 							x: Math.random() * (CANVAS_SIZE - TILE_SIZE),
@@ -58,7 +58,8 @@ const styles = StyleSheet.create({
 	canvas: {
 		width: CANVAS_SIZE,
 		height: CANVAS_SIZE,
-		backgroundColor: "#eee",
+		borderRadius: 7,
+		backgroundColor: "#bbada0",
 		position: "relative",
 	},
 });
