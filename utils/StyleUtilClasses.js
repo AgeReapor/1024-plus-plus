@@ -4,14 +4,16 @@ export const px2rem = (px) => {
 	return px / REM_IN_PX;
 };
 
-export const flex_center = {
+export const flex = {
 	flex: 1,
+};
+
+export const flex_center = {
 	alignItems: "center",
 	justifyContent: "center",
 };
 
 export const flex_row = {
-	flex: 1,
 	flexDirection: "row",
 };
 
@@ -42,5 +44,11 @@ export const width = (rem) => {
 export const height = (rem) => {
 	return {
 		height: rem * REM_IN_PX,
+	};
+};
+
+export const bgColor = (color = "#fff") => {
+	return {
+		backgroundColor: color,
 	};
 };

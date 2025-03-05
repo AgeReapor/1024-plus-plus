@@ -4,7 +4,6 @@ import Animated, {
 	interpolateColor,
 	useAnimatedStyle,
 	withTiming,
-	withSpring,
 } from "react-native-reanimated";
 
 export default function Tile(props) {
@@ -13,7 +12,7 @@ export default function Tile(props) {
 			backgroundColor: withTiming(
 				interpolateColor(
 					props.val,
-					[2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048],
+					[0, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048],
 					tileColors
 				)
 			),
@@ -28,7 +27,7 @@ export default function Tile(props) {
 
 	const textAnimStyles = useAnimatedStyle(() => {
 		return {
-			color: withTiming(interpolateColor(props.val, [4, 8], textColors)),
+			color: interpolateColor(props.val, [0, 2, 4, 8], textColors),
 			fontSize: interpolate(props.val, [16, 256, 1024, 2048], fontSizes),
 		};
 	});
@@ -61,6 +60,7 @@ const sheet = StyleSheet.create({
 });
 
 const tileColors = [
+	"#cdc1b4", // ""
 	"#eee4da", // 2
 	"#ede0c8", // 4
 	"#f2b179", // 8
@@ -75,10 +75,10 @@ const tileColors = [
 ];
 
 const textColors = [
+	"#00000000", // 0
 	"#776e65", // 2 onwards
-	// "#776e65",
+	"#776e65",
 	"#f8f3ee", // 8 onwards
-	// "#f8f3ee",
 ];
 
 const fontSizes = [48, 40, 34, 34];
