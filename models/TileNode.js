@@ -13,9 +13,22 @@ export class TileNode {
 		name,
 		posIdx,
 		val = 2,
-		createdCB = () => {},
-		translateCB = (a, b) => {},
-		deleteCB = () => {}
+		createdCB = () => {
+			console.log(
+				"Tile created: ",
+				name,
+				"at",
+				posIdx,
+				"with value",
+				val
+			);
+		},
+		translateCB = (a, b) => {
+			console.log("Tile " + name + " moved from", a, "to", b);
+		},
+		deleteCB = () => {
+			console.log("Tile " + name + " deleted");
+		}
 	) {
 		this.#name = name;
 		this.#posIdx = posIdx;
