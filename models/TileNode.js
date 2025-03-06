@@ -17,14 +17,14 @@ export class TileNode {
 			console.log(
 				"Tile created: ",
 				name,
-				"at",
+				"at index ",
 				posIdx,
 				"with value",
 				val
 			);
 		},
 		translateCB = (a, b) => {
-			console.log("Tile " + name + " moved from", a, "to", b);
+			console.log("Tile " + name + " moved from index ", a, "to", b);
 		},
 		deleteCB = () => {
 			console.log("Tile " + name + " deleted");
@@ -61,7 +61,6 @@ export class TileNode {
 		let oldVal = this.#posIdx;
 		let newVal = (this.#posIdx = idx);
 		this.#translateCB(oldVal, newVal);
-		console.log("posIdx " + this.#posIdx);
 	}
 
 	doubleVal() {
