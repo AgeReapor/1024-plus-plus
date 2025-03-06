@@ -39,10 +39,8 @@ export class TileNode {
 		createdCB(this);
 	}
 
-	set posIdx(idx) {
-		let oldVal = this.#posIdx;
-		let newVal = (this.#posIdx = poidxsIdx);
-		return this.#translateCB(oldVal, newVal);
+	get posIdx() {
+		return this.#posIdx;
 	}
 
 	get name() {
@@ -58,7 +56,12 @@ export class TileNode {
 	}
 
 	move(idx) {
-		this.posIdx = idx;
+		if (idx < 0 || idx > 15) throw new Error("Invalid move index: ", idx);
+
+		let oldVal = this.#posIdx;
+		let newVal = (this.#posIdx = idx);
+		this.#translateCB(oldVal, newVal);
+		console.log("posIdx " + this.#posIdx);
 	}
 
 	doubleVal() {

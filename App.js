@@ -7,7 +7,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { Button, Text } from "react-native";
 import { StyleSheet } from "react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import * as style from "./utils/StyleUtilClasses";
 import Canvas from "./components/Canvas.component";
@@ -16,14 +16,15 @@ import { TileNode } from "./models/TileNode";
 const CANVAS_SIZE = 350;
 const TILE_SIZE = 80;
 
-const tileNodes = [new TileNode("1", 0, 2), new TileNode("2", 1, 4)];
-
 export default function App() {
 	const [state, setState] = useState({
 		x: 0,
 		y: 0,
 		val: "",
 	});
+
+	const [tileNodes, setTileNodes] = useState([]);
+	const tracker = useRef(0);
 
 	return (
 		<Animated.View
@@ -35,33 +36,7 @@ export default function App() {
 			]}
 		>
 			<Canvas tileNodes={tileNodes} />
-			<Animated.View style={[stylesheet.canvas]}>
-				<Tile
-					x={state.x}
-					y={state.y}
-					val={state.val}
-					size={TileNode.tileSize}
-				/>
-			</Animated.View>
-			<Animated.View style={[style.alignItems("start"), style.gap()]}>
-				<Text>
-					Position: {Math.round(state.x)}, {Math.round(state.y)}
-				</Text>
-				<Button
-					title="Change Position"
-					onPress={() => {
-						var newVal = state.val * 2;
-						if (newVal <= 1) newVal = 2;
-						if (newVal > 2048) newVal = 0;
 
-						setState({
-							x: Math.random() * (CANVAS_SIZE - TILE_SIZE),
-							y: Math.random() * (CANVAS_SIZE - TILE_SIZE),
-							val: newVal,
-						});
-					}}
-				/>
-			</Animated.View>
 			<Animated.View
 				style={[
 					style.flex_center,
@@ -70,10 +45,33 @@ export default function App() {
 					stylesheet.toolbar,
 				]}
 			>
-				<Button title="Spawn"></Button>
-				<Button title="Delete"></Button>
-				<Button title="Hidden"></Button>
-				<Button title="Slide"></Button>
+				<Button
+					title="Spawn"
+					onPress={() => {
+						setTileNodes([new TileNode(tracker.current++, 0)]);
+					}}
+				></Button>
+				<Button
+					title="Move"
+					onPress={() => {
+						if (tileNodes.length === 0) return;
+						let oldTileNode = tileNodes[0];
+
+						setTileNodes([
+							new TileNode(
+								oldTileNode.name,
+								(oldTileNode.posIdx + 1) % 15
+							),
+						]);
+					}}
+				></Button>
+				<Button
+					title="Delete"
+					onPress={() => {
+						tileNodes.forEach((tileNode) => tileNode.delete());
+						setTileNodes([]);
+					}}
+				></Button>
 			</Animated.View>
 		</Animated.View>
 	);
@@ -89,11 +87,3 @@ const stylesheet = StyleSheet.create({
 	},
 	toolbar: {},
 });
-
-const onSpawn = () => {};
-
-const onDelete = () => {};
-
-const onSlide = () => {};
-
-const onHidden = () => {};
