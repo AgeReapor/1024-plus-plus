@@ -1,4 +1,4 @@
-import Animated from "react-native-reanimated";
+import Animated, { useSharedValue } from "react-native-reanimated";
 import { Button, Text } from "react-native";
 import { StyleSheet } from "react-native";
 import { useEffect, useRef, useState } from "react";
@@ -10,6 +10,7 @@ const CANVAS_SIZE = 350;
 
 export default function App() {
 	const [tileNodes, setTileNodes] = useState([]);
+
 	const mngr = new GameManager(tileNodes, setTileNodes, fullBoardHandler);
 
 	return (
@@ -85,81 +86,4 @@ const stylesheet = StyleSheet.create({
 	toolbar: {},
 });
 
-const fullBoardHandler = () => {
-	const [showModal, setShowModal] = useState(false);
-
-	const handleConfirm = () => {
-		setShowModal(false);
-		mngr.clearBoard();
-	};
-
-	const handleCancel = () => {
-		setShowModal(false);
-	};
-
-	return (
-		<>
-			{showModal && (
-				<Modal
-					animationType="fade"
-					transparent={true}
-					visible={showModal}
-				>
-					<View style={styles.centeredView}>
-						<View style={styles.modalView}>
-							<Text style={styles.modalText}>Game Over</Text>
-
-							<Text style={styles.modalText}>
-								Are you sure you want to restart the game?
-							</Text>
-
-							<View style={{ flexDirection: "row" }}>
-								<Button title="Cancel" onPress={handleCancel} />
-								<Button
-									title="Confirm"
-									onPress={handleConfirm}
-								/>
-							</View>
-						</View>
-					</View>
-				</Modal>
-			)}
-
-			{fullBoardHandler && (
-				<Button
-					title="Full Board"
-					onPress={() => {
-						setShowModal(true);
-					}}
-				></Button>
-			)}
-		</>
-	);
-
-	const styles = StyleSheet.create({
-		centeredView: {
-			flex: 1,
-			justifyContent: "center",
-			alignItems: "center",
-			backgroundColor: "rgba(0,0,0,0.5)",
-		},
-		modalView: {
-			backgroundColor: "white",
-			borderRadius: 20,
-			padding: 35,
-			alignItems: "center",
-			shadowColor: "#000",
-			shadowOffset: {
-				width: 0,
-				height: 2,
-			},
-			shadowOpacity: 0.25,
-			shadowRadius: 4,
-			elevation: 5,
-		},
-		modalText: {
-			marginBottom: 15,
-			textAlign: "center",
-		},
-	});
-};
+const fullBoardHandler = () => {};
