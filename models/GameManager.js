@@ -4,7 +4,7 @@ export class GameManager {
 	#tileNodes;
 	#setTileNodes;
 	#isFullCB;
-	#keyTracker;
+	static #keyTracker = 0;
 	constructor(
 		tileNodes,
 		setTileNodes,
@@ -15,7 +15,14 @@ export class GameManager {
 		this.#tileNodes = tileNodes;
 		this.#setTileNodes = setTileNodes;
 		this.#isFullCB = isFullCB;
-		this.#keyTracker = 0;
+	}
+
+	get keyTracker() {
+		return GameManager.#keyTracker;
+	}
+
+	set keyTracker(keyTracker) {
+		GameManager.#keyTracker = keyTracker;
 	}
 
 	get tileNodes() {
@@ -75,11 +82,10 @@ export class GameManager {
 			throw new Error("Tried to spawn tile on full board");
 		}
 
-		// this.#tileNodes.push(new TileNode(this.#keyTracker++, idx, val));
+		let newTileNode = new TileNode(++GameManager.#keyTracker, idx, val);
 
-		let tileNodes = this.#tileNodes;
-		tileNodes.push(new TileNode(this.#keyTracker++, idx, val));
-		this.#setTileNodes(tileNodes);
+		let newTileNodes = [...this.#tileNodes, newTileNode];
+		this.#setTileNodes(newTileNodes);
 	}
 
 	deleteTile(idx) {
@@ -87,45 +93,51 @@ export class GameManager {
 		if (tileNode === null)
 			throw new Error("Tried deleting empty tile", idx);
 
-		let tileNodes = this.#tileNodes;
-		tileNodes.splice(tileNodes.indexOf(tileNode), 1);
-		this.#setTileNodes(tileNodes);
+		const newTileNodes = this.#tileNodes.filter(
+			(tileNode) => tileNode.posIdx !== idx
+		);
+		this.#setTileNodes(newTileNodes);
 
 		tileNode.delete();
 	}
 
-	moveTile(from, to) {
-		if (this.getTileNode(from) === null)
-			throw new Error("Tried moving empty tile", from);
-		if (this.getTileNode(to) !== null)
-			throw new Error("Tried moving " + from + " to occupied tile", to);
+	// moveTile(from, to) {
+	// 	if (this.getTileNode(from) === null)
+	// 		throw new Error("Tried moving empty tile", from);
+	// 	if (this.getTileNode(to) !== null)
+	// 		throw new Error("Tried moving " + from + " to occupied tile", to);
 
-		let tileNodeFrom = this.getTileNode(from);
-		tileNodeFrom.move(to);
-	}
+	// 	let tileNodeFrom = this.getTileNode(from);
+	// 	tileNodeFrom.move(to);
+	// }
 
-	mergeTile(from, to) {
-		let tileNodeFrom = this.getTileNode(from);
-		let tileNodeTo = this.getTileNode(to);
+	// mergeTile(from, to) {
+	// 	let tileNodeFrom = this.getTileNode(from);
+	// 	let tileNodeTo = this.getTileNode(to);
 
-		if (tileNodeFrom === null || tileNodeTo === null)
-			throw new Error("Missing tiles to merge: ", from, to);
-		if (tileNodeFrom.val !== tileNodeTo.val)
-			throw new Error(
-				"Tried merging tiles with different values: ",
-				from,
-				"=" + tileNodeFrom.val,
-				"; ",
-				to + "=" + tileNodeTo.val
-			);
-		tileNodeFrom.move(to);
-		tileNodeFrom.doubleVal();
-		this.deleteTile(to);
-	}
+	// 	if (tileNodeFrom === null || tileNodeTo === null)
+	// 		throw new Error("Missing tiles to merge: ", from, to);
+	// 	if (tileNodeFrom.val !== tileNodeTo.val)
+	// 		throw new Error(
+	// 			"Tried merging tiles with different values: ",
+	// 			from,
+	// 			"=" + tileNodeFrom.val,
+	// 			"; ",
+	// 			to + "=" + tileNodeTo.val
+	// 		);
+	// 	tileNodeFrom.move(to);
+	// 	tileNodeFrom.doubleVal();
+	// 	this.deleteTile(to);
+	// }
 
 	clearBoard() {
-		while (this.#tileNodes.length > 0) {
-			this.deleteTile(this.#tileNodes[0].posIdx);
+		for (let tileNode of this.#tileNodes) {
+			tileNode.delete();
 		}
+
+		const newTileNodes = this.#tileNodes.filter(
+			(tileNode) => tileNode.posIdx < -1
+		);
+		this.#setTileNodes(newTileNodes);
 	}
 }

@@ -51,7 +51,15 @@ export default function App() {
 						// ]);
 					}}
 				></Button>
-				<Button title="Delete" onPress={() => {}}></Button>
+				<Button
+					title="Delete"
+					onPress={() => {
+						if (tileNodes.length === 0)
+							throw new Error("No tiles to delete");
+						let idx = tileNodes[0].posIdx;
+						mngr.deleteTile(idx);
+					}}
+				></Button>
 				<Button
 					title="Clear"
 					onPress={() => {
