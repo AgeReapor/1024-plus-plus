@@ -7,14 +7,16 @@ import Animated, {
 } from "react-native-reanimated";
 import { Button, Text } from "react-native";
 import { StyleSheet } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import * as style from "./utils/StyleUtilClasses";
 import Canvas from "./components/Canvas.component";
 import Tile from "./components/Tile.component";
-
+import { TileNode } from "./models/TileNode";
 const CANVAS_SIZE = 350;
 const TILE_SIZE = 80;
+
+const tileNodes = [new TileNode("1", 0, 2), new TileNode("2", 1, 4)];
 
 export default function App() {
 	const [state, setState] = useState({
@@ -32,13 +34,13 @@ export default function App() {
 				style.bgColor("#faf8ef"),
 			]}
 		>
-			<Canvas />
+			<Canvas tileNodes={tileNodes} />
 			<Animated.View style={[stylesheet.canvas]}>
 				<Tile
 					x={state.x}
 					y={state.y}
 					val={state.val}
-					size={TILE_SIZE}
+					size={TileNode.tileSize}
 				/>
 			</Animated.View>
 			<Animated.View style={[style.alignItems("start"), style.gap()]}>
