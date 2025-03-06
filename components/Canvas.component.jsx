@@ -10,11 +10,11 @@ const GRID_SIZE = 4;
 const TILES_COUNT = GRID_SIZE ** 2;
 const TILE_SIZE = 80;
 
-export default function Canvas(props) {
+export default function Canvas({ tileNodes }) {
 	return (
 		<Animated.View style={[stylesheet.canvas]}>
 			<BackgroundGrid></BackgroundGrid>
-			<GameBoard tileNodes={props.tileNodes}></GameBoard>
+			<GameBoard tileNodes={tileNodes}></GameBoard>
 		</Animated.View>
 	);
 }

@@ -70,7 +70,7 @@ export class GameManager {
 		return emptyTiles[Math.floor(Math.random() * emptyTiles.length)];
 	}
 
-	spawnTile(idx = -1, val = 2) {
+	spawnTile(idx = -1, val = 2, name = null) {
 		if (idx < -1 || idx > 15) throw new Error("Invalid spawn index: ", idx);
 
 		try {
@@ -79,10 +79,11 @@ export class GameManager {
 			if (e.message !== "No empty tiles on board") throw e;
 
 			this.#isFullCB();
-			throw new Error("Tried to spawn tile on full board");
 		}
 
-		let newTileNode = new TileNode(++GameManager.#keyTracker, idx, val);
+		if (name === null) name = ++GameManager.#keyTracker;
+
+		let newTileNode = new TileNode(name, idx, val);
 
 		let newTileNodes = [...this.#tileNodes, newTileNode];
 		this.#setTileNodes(newTileNodes);
@@ -101,15 +102,20 @@ export class GameManager {
 		tileNode.delete();
 	}
 
-	// moveTile(from, to) {
-	// 	if (this.getTileNode(from) === null)
-	// 		throw new Error("Tried moving empty tile", from);
-	// 	if (this.getTileNode(to) !== null)
-	// 		throw new Error("Tried moving " + from + " to occupied tile", to);
+	moveTile(from, to) {
+		if (this.getTileNode(from) === null)
+			throw new Error("Tried moving empty tile", from);
+		if (this.getTileNode(to) !== null)
+			throw new Error("Tried moving " + from + " to occupied tile", to);
 
-	// 	let tileNodeFrom = this.getTileNode(from);
-	// 	tileNodeFrom.move(to);
-	// }
+		let tileNodeFrom = this.getTileNode(from);
+		let nameFrom = tileNodeFrom.name;
+
+		this.deleteTile(from);
+		this.spawnTile(to, tileNodeFrom.val, nameFrom);
+
+		tileNodeFrom.move(to);
+	}
 
 	// mergeTile(from, to) {
 	// 	let tileNodeFrom = this.getTileNode(from);

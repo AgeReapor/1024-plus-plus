@@ -1,14 +1,14 @@
-import Animated from "react-native-reanimated";
+import Animated, { useSharedValue } from "react-native-reanimated";
 import { StyleSheet } from "react-native";
 import { TileNode } from "../models/TileNode";
 import Tile from "./Tile.component";
 
 const CANVAS_SIZE = 350;
 
-export default function GameBoard(props) {
+export default function GameBoard({ tileNodes }) {
 	return (
 		<Animated.View style={[stylesheet.gameBoard]}>
-			{props.tileNodes.map((tileNode) => {
+			{tileNodes.map((tileNode) => {
 				return (
 					<Tile
 						key={tileNode.name}

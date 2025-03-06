@@ -16,7 +16,6 @@ import Animated, {
 
 export default function Tile(props) {
 	const scale = useSharedValue(0);
-	const opacity = useSharedValue(1);
 
 	// Pulse when value changes
 	useEffect(() => {
@@ -60,6 +59,10 @@ export default function Tile(props) {
 			fontSize: interpolate(props.val, [16, 256, 1024, 2048], fontSizes),
 		};
 	});
+
+	const deathAnimation = () => {
+		scale = 0;
+	};
 
 	return (
 		<Animated.View style={[sheet.tile, tileAnimStyles]}>
