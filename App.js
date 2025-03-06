@@ -73,6 +73,17 @@ export default function App() {
 						mngr.clearBoard();
 					}}
 				></Button>
+				<Button
+					title="Merge"
+					onPress={() => {
+						if (tileNodes.length > 1) {
+							mngr.mergeTiles(
+								tileNodes[0].posIdx,
+								tileNodes[1].posIdx
+							);
+						}
+					}}
+				></Button>
 			</Animated.View>
 		</Animated.View>
 	);

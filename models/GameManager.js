@@ -117,24 +117,26 @@ export class GameManager {
 		tileNodeFrom.move(to);
 	}
 
-	// mergeTile(from, to) {
-	// 	let tileNodeFrom = this.getTileNode(from);
-	// 	let tileNodeTo = this.getTileNode(to);
+	mergeTiles(from, to) {
+		console.log("Call to merge tiles: " + from + " to " + to);
 
-	// 	if (tileNodeFrom === null || tileNodeTo === null)
-	// 		throw new Error("Missing tiles to merge: ", from, to);
-	// 	if (tileNodeFrom.val !== tileNodeTo.val)
-	// 		throw new Error(
-	// 			"Tried merging tiles with different values: ",
-	// 			from,
-	// 			"=" + tileNodeFrom.val,
-	// 			"; ",
-	// 			to + "=" + tileNodeTo.val
-	// 		);
-	// 	tileNodeFrom.move(to);
-	// 	tileNodeFrom.doubleVal();
-	// 	this.deleteTile(to);
-	// }
+		// let tileNodeFrom = this.getTileNode(from);
+		// let tileNodeTo = this.getTileNode(to);
+
+		// if (tileNodeFrom === null || tileNodeTo === null)
+		// 	throw new Error("Missing tiles to merge: ", from, to);
+		// if (tileNodeFrom.val !== tileNodeTo.val)
+		// 	throw new Error(
+		// 		"Tried merging tiles with different values: ",
+		// 		from,
+		// 		"=" + tileNodeFrom.val,
+		// 		"; ",
+		// 		to + "=" + tileNodeTo.val
+		// 	);
+		// tileNodeFrom.move(to);
+		// tileNodeFrom.doubleVal();
+		// this.deleteTile(to);
+	}
 
 	clearBoard() {
 		for (let tileNode of this.#tileNodes) {
