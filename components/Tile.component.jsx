@@ -10,19 +10,30 @@ import Animated, {
 	withRepeat,
 	withSequence,
 	withTiming,
+	withSpring,
 	useSharedValue,
 } from "react-native-reanimated";
 
 export default function Tile(props) {
-	const scale = useSharedValue(1);
+	const scale = useSharedValue(0);
 	const opacity = useSharedValue(1);
 
+	// Pulse when value changes
 	useEffect(() => {
+		if (scale.value === 0) return;
 		scale.value = 1.5;
 		setTimeout(() => {
 			scale.value = 1;
 		}, 100);
 	}, [props.val]);
+
+	// on spawn, grow to full size
+	useEffect(() => {
+		scale.value = 1.2;
+		setTimeout(() => {
+			scale.value = 1;
+		}, 100);
+	}, []);
 
 	const tileAnimStyles = useAnimatedStyle(() => {
 		return {
@@ -36,7 +47,7 @@ export default function Tile(props) {
 			transform: [
 				{ translateX: withTiming(props.x, translateConfig) },
 				{ translateY: withTiming(props.y, translateConfig) },
-				{ scale: withTiming(scale.value, scaleConfig) },
+				{ scale: withSpring(scale.value, scaleConfig) },
 			],
 			width: props.size,
 			height: props.size,
@@ -109,8 +120,6 @@ const translateConfig = {
 
 const scaleConfig = {
 	duration: 100,
-	easing: Easing.inOut(Easing.quad),
-	// reduceMotion: ReduceMotion.System,
 };
 
 const pulseAnim = {};

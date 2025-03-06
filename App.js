@@ -32,11 +32,7 @@ export default function App() {
 				style.bgColor("#faf8ef"),
 			]}
 		>
-			<Canvas
-				addCoords={(coords) => {
-					setTileCoords([...coords]);
-				}}
-			/>
+			<Canvas />
 			<Animated.View style={[stylesheet.canvas]}>
 				<Tile
 					x={state.x}
