@@ -1,7 +1,7 @@
 import Animated, { useSharedValue } from "react-native-reanimated";
 import { Button, Text } from "react-native";
 import { StyleSheet } from "react-native";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import * as style from "./utils/StyleUtilClasses";
 import Canvas from "./components/Canvas.component";
@@ -10,6 +10,8 @@ const CANVAS_SIZE = 350;
 
 export default function App() {
 	const [tileNodes, setTileNodes] = useState([]);
+	const [, updateState] = React.useState();
+	const forceUpdate = React.useCallback(() => updateState({}), []);
 
 	const mngr = new GameManager(tileNodes, setTileNodes, fullBoardHandler);
 
@@ -53,6 +55,7 @@ export default function App() {
 									throw e;
 							}
 						}
+						forceUpdate();
 					}}
 				></Button>
 				<Button
