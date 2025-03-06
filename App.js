@@ -1,30 +1,16 @@
-import Animated, {
-	useSharedValue,
-	withTiming,
-	useAnimatedStyle,
-	Easing,
-	interpolateColor,
-} from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { Button, Text } from "react-native";
 import { StyleSheet } from "react-native";
 import { useEffect, useRef, useState } from "react";
 
 import * as style from "./utils/StyleUtilClasses";
 import Canvas from "./components/Canvas.component";
-import Tile from "./components/Tile.component";
-import { TileNode } from "./models/TileNode";
+import { GameManager } from "./models/GameManager";
 const CANVAS_SIZE = 350;
-const TILE_SIZE = 80;
 
 export default function App() {
-	const [state, setState] = useState({
-		x: 0,
-		y: 0,
-		val: "",
-	});
-
 	const [tileNodes, setTileNodes] = useState([]);
-	const tracker = useRef(0);
+	const mngr = new GameManager(tileNodes, setTileNodes);
 
 	return (
 		<Animated.View
@@ -48,28 +34,28 @@ export default function App() {
 				<Button
 					title="Spawn"
 					onPress={() => {
-						setTileNodes([new TileNode(tracker.current++, 0)]);
+						// setTileNodes([new TileNode(tracker.current++, 0)]);
+						mngr.spawnTile();
 					}}
 				></Button>
 				<Button
 					title="Move"
 					onPress={() => {
-						if (tileNodes.length === 0) return;
-						let oldTileNode = tileNodes[0];
-
-						setTileNodes([
-							new TileNode(
-								oldTileNode.name,
-								(oldTileNode.posIdx + 1) % 15
-							),
-						]);
+						// if (tileNodes.length === 0) return;
+						// let oldTileNode = tileNodes[0];
+						// setTileNodes([
+						// 	new TileNode(
+						// 		oldTileNode.name,
+						// 		(oldTileNode.posIdx + 1) % 15
+						// 	),
+						// ]);
 					}}
 				></Button>
+				<Button title="Delete" onPress={() => {}}></Button>
 				<Button
-					title="Delete"
+					title="Clear"
 					onPress={() => {
-						tileNodes.forEach((tileNode) => tileNode.delete());
-						setTileNodes([]);
+						mngr.clearBoard();
 					}}
 				></Button>
 			</Animated.View>

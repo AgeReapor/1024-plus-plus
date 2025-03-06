@@ -1,10 +1,9 @@
-import { StyleSheet, Text } from "react-native";
+import { StyleSheet } from "react-native";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
-import * as style from "../utils/StyleUtilClasses";
 import calcGridCoords from "../utils/CalcGridCoords";
 import Tile from "./Tile.component";
-import { TileNode } from "../models/TileNode";
 import { useEffect } from "react";
+import GameBoard from "./GameBoard.component";
 
 const CANVAS_SIZE = 350;
 const GRID_SIZE = 4;
@@ -12,23 +11,10 @@ const TILES_COUNT = GRID_SIZE ** 2;
 const TILE_SIZE = 80;
 
 export default function Canvas(props) {
-	const canvasAnimStyles = useAnimatedStyle(() => {
-		return {};
-	});
-
-	const bgAnimStyles = useAnimatedStyle(() => {
-		return {
-			width: TILE_SIZE,
-			height: TILE_SIZE,
-		};
-	});
-
-	useEffect(() => {}, []);
-
 	return (
-		<Animated.View style={[stylesheet.canvas, canvasAnimStyles]}>
+		<Animated.View style={[stylesheet.canvas]}>
 			<BackgroundGrid></BackgroundGrid>
-			<GameGrid tileNodes={props.tileNodes}></GameGrid>
+			<GameBoard tileNodes={props.tileNodes}></GameBoard>
 		</Animated.View>
 	);
 }
@@ -52,29 +38,6 @@ const BackgroundGrid = () => {
 	);
 };
 
-const GameGrid = (props) => {
-	let tileNodes = props.tileNodes;
-	return (
-		<Animated.View style={[stylesheet.fgGrid]}>
-			{/* <Tile key={"test2"} x={203} y={2} val={2} size={TILE_SIZE} />
-			<Tile key={"test1"} x={103} y={2} val={2} size={TILE_SIZE} />
-			<Tile key={"test3"} x={0} y={2} val={4} size={TILE_SIZE} /> */}
-
-			{tileNodes.map((tileNode) => {
-				return (
-					<Tile
-						key={tileNode.name}
-						x={tileNode.coords.x}
-						y={tileNode.coords.y}
-						val={tileNode.val}
-						size={TileNode.tileSize}
-					></Tile>
-				);
-			})}
-		</Animated.View>
-	);
-};
-
 const stylesheet = StyleSheet.create({
 	canvas: {
 		position: "relative",
@@ -87,10 +50,5 @@ const stylesheet = StyleSheet.create({
 		width: CANVAS_SIZE,
 		height: CANVAS_SIZE,
 		borderRadius: 7,
-	},
-	fgGrid: {
-		position: "absolute",
-		width: CANVAS_SIZE,
-		height: CANVAS_SIZE,
 	},
 });
