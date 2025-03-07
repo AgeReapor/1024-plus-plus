@@ -1,20 +1,18 @@
 import { StyleSheet } from "react-native";
-import Animated, { useAnimatedStyle } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import calcGridCoords from "../utils/CalcGridCoords";
 import Tile from "./Tile.component";
-import { useEffect } from "react";
-import GameBoard from "./GameBoard.component";
+import { useState } from "react";
 
 const CANVAS_SIZE = 350;
 const GRID_SIZE = 4;
 const TILES_COUNT = GRID_SIZE ** 2;
-const TILE_SIZE = 80;
 
-export default function Canvas({ tileNodes }) {
+export default function Canvas({ children }) {
 	return (
 		<Animated.View style={[stylesheet.canvas]}>
 			<BackgroundGrid></BackgroundGrid>
-			<GameBoard tileNodes={tileNodes}></GameBoard>
+			{children}
 		</Animated.View>
 	);
 }
@@ -30,7 +28,6 @@ const BackgroundGrid = () => {
 						x={coords.x}
 						y={coords.y}
 						val={0}
-						size={TILE_SIZE}
 					></Tile>
 				);
 			})}

@@ -3,23 +3,26 @@ import Animated, {
 	useSharedValue,
 } from "react-native-reanimated";
 import { StyleSheet } from "react-native";
-import { TileNode } from "../models/TileNode";
+import { useEffect, useState } from "react";
+
 import Tile from "./Tile.component";
-import { useEffect } from "react";
+
+import calcGridCoords from "../utils/CalcGridCoords";
 
 const CANVAS_SIZE = 350;
+const GRID_SLOTS = 16;
 
 export default function GameBoard({ tileNodes }) {
 	return (
 		<Animated.View style={[stylesheet.gameBoard]}>
 			{tileNodes.map((tileNode) => {
+				const { x, y } = calcGridCoords(tileNode.slot);
 				return (
 					<Tile
 						key={tileNode.name}
-						x={tileNode.coords.x}
-						y={tileNode.coords.y}
+						x={x}
+						y={y}
 						val={tileNode.val}
-						size={TileNode.tileSize}
 					></Tile>
 				);
 			})}

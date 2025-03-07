@@ -18,7 +18,7 @@
 	"scripts": {
 		"start": "expo start",
 		"android": "expo start --android",
-		"a": "expo start --android --port 5554",
+		"a": "expo start --android",
 		"ios": "expo start --ios",
 		"web": "expo start --web"
 	}

@@ -1,20 +1,17 @@
 import { useEffect } from "react";
 import { StyleSheet } from "react-native";
 import Animated, {
-	cancelAnimation,
 	Easing,
 	interpolate,
 	interpolateColor,
 	ReduceMotion,
 	useAnimatedStyle,
-	withRepeat,
-	withSequence,
 	withTiming,
 	withSpring,
 	useSharedValue,
 } from "react-native-reanimated";
 
-export default function Tile(props) {
+export default function Tile({ x, y, val, size = 80 }) {
 	const scale = useSharedValue(0);
 
 	// Pulse when value changes
@@ -24,7 +21,7 @@ export default function Tile(props) {
 		setTimeout(() => {
 			scale.value = 1;
 		}, 100);
-	}, [props.val]);
+	}, [val]);
 
 	// on spawn, grow to full size
 	useEffect(() => {
@@ -38,25 +35,25 @@ export default function Tile(props) {
 		return {
 			backgroundColor: withTiming(
 				interpolateColor(
-					props.val,
+					val,
 					[0, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048],
 					tileColors
 				)
 			),
 			transform: [
-				{ translateX: withTiming(props.x, translateConfig) },
-				{ translateY: withTiming(props.y, translateConfig) },
+				{ translateX: withTiming(x, translateConfig) },
+				{ translateY: withTiming(y, translateConfig) },
 				{ scale: withSpring(scale.value, scaleConfig) },
 			],
-			width: props.size,
-			height: props.size,
+			width: size,
+			height: size,
 		};
 	});
 
 	const textAnimStyles = useAnimatedStyle(() => {
 		return {
-			color: interpolateColor(props.val, [0, 2, 4, 8], textColors),
-			fontSize: interpolate(props.val, [16, 256, 1024, 2048], fontSizes),
+			color: interpolateColor(val, [0, 2, 4, 8], textColors),
+			fontSize: interpolate(val, [16, 256, 1024, 2048], fontSizes),
 		};
 	});
 
@@ -67,7 +64,7 @@ export default function Tile(props) {
 	return (
 		<Animated.View style={[sheet.tile, tileAnimStyles]}>
 			<Animated.Text style={[sheet.text, textAnimStyles]}>
-				{props.val}
+				{val}
 			</Animated.Text>
 		</Animated.View>
 	);
@@ -118,11 +115,10 @@ const fontSizes = [48, 40, 34, 34];
 const translateConfig = {
 	duration: 300,
 	easing: Easing.inOut(Easing.quad),
-	// reduceMotion: ReduceMotion.System,
+	reduceMotion: ReduceMotion.System,
 };
 
 const scaleConfig = {
 	duration: 100,
+	reduceMotion: ReduceMotion.System,
 };
-
-const pulseAnim = {};

@@ -1,19 +1,44 @@
-import Animated, { useSharedValue } from "react-native-reanimated";
-import { Button, Text } from "react-native";
+import Animated from "react-native-reanimated";
+import { Button } from "react-native";
 import { StyleSheet } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
+
+import Canvas from "./components/Canvas";
+import GameBoard from "./components/GameBoard.component";
 
 import * as style from "./utils/StyleUtilClasses";
-import Canvas from "./components/Canvas.component";
-import { GameManager } from "./models/GameManager";
+
 const CANVAS_SIZE = 350;
 
+class TileNode {
+	constructor(name, slot, val = 2) {
+		this.name = name;
+		this.slot = slot;
+		this.val = val;
+	}
+}
+
 export default function App() {
-	const [tileNodes, setTileNodes] = useState([]);
 	const [, updateState] = React.useState();
 	const forceUpdate = React.useCallback(() => updateState({}), []);
 
-	const mngr = new GameManager(tileNodes, setTileNodes, fullBoardHandler);
+	const [tileNodes, setTileNodes] = useState([]);
+
+	const spawnHandler = () => {
+		forceUpdate();
+	};
+	const moveHandler = () => {
+		forceUpdate();
+	};
+	const deleteHandler = () => {
+		forceUpdate();
+	};
+	const clearHandler = () => {
+		forceUpdate();
+	};
+	const mergeHandler = () => {
+		forceUpdate();
+	};
 
 	return (
 		<Animated.View
@@ -24,7 +49,9 @@ export default function App() {
 				style.bgColor("#faf8ef"),
 			]}
 		>
-			<Canvas tileNodes={tileNodes} />
+			<Canvas>
+				<GameBoard tileNodes={tileNodes}></GameBoard>
+			</Canvas>
 
 			<Animated.View
 				style={[
@@ -34,60 +61,19 @@ export default function App() {
 					stylesheet.toolbar,
 				]}
 			>
-				<Button
-					title="Spawn"
-					onPress={() => {
-						mngr.spawnTile();
-					}}
-				></Button>
-				<Button
-					title="Move"
-					onPress={() => {
-						if (tileNodes.length === 0)
-							throw new Error("No tiles to move");
-						for (let i = 15; i >= 0; i--) {
-							const node = mngr.getTileNode(i);
-							if (node === null) continue;
-							try {
-								mngr.getTileNode(i).move((i + 1) % 16);
-							} catch (e) {
-								if (e.message !== "Tried moving empty tile")
-									throw e;
-							}
-						}
-						forceUpdate();
-					}}
-				></Button>
-				<Button
-					title="Delete"
-					onPress={() => {
-						if (tileNodes.length === 0)
-							throw new Error("No tiles to delete");
-						let idx = tileNodes[0].posIdx;
-						mngr.deleteTile(idx);
-					}}
-				></Button>
-				<Button
-					title="Clear"
-					onPress={() => {
-						mngr.clearBoard();
-					}}
-				></Button>
-				<Button
-					title="Merge"
-					onPress={() => {
-						if (tileNodes.length > 1) {
-							mngr.mergeTiles(
-								tileNodes[0].posIdx,
-								tileNodes[1].posIdx
-							);
-						}
-					}}
-				></Button>
+				<Button title="Spawn" onPress={spawnHandler}></Button>
+				<Button title="Move" onPress={moveHandler}></Button>
+				<Button title="Delete" onPress={deleteHandler}></Button>
+				<Button title="Clear" onPress={clearHandler}></Button>
+				<Button title="Merge" onPress={mergeHandler}></Button>
 			</Animated.View>
 		</Animated.View>
 	);
 }
+
+const fullBoardHandler = () => {
+	console.log("Modal Should Appear Here");
+};
 
 const stylesheet = StyleSheet.create({
 	canvas: {
@@ -99,5 +85,3 @@ const stylesheet = StyleSheet.create({
 	},
 	toolbar: {},
 });
-
-const fullBoardHandler = () => {};
