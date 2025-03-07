@@ -11,7 +11,16 @@ import Animated, {
 	useSharedValue,
 } from "react-native-reanimated";
 
-export default function Tile({ x, y, val, size = 80 }) {
+export default function Tile({
+	x,
+	y,
+	val,
+	isAlive = true,
+	size = 80,
+	deathCB = () => {
+		console.log("Tile died");
+	},
+}) {
 	const scale = useSharedValue(0);
 
 	// Pulse when value changes
@@ -30,6 +39,14 @@ export default function Tile({ x, y, val, size = 80 }) {
 			scale.value = 1;
 		}, 100);
 	}, []);
+
+	useEffect(() => {
+		if (isAlive) return;
+		deathAnimation();
+		setTimeout(() => {
+			deathCB();
+		}, 100);
+	}, [isAlive]);
 
 	const tileAnimStyles = useAnimatedStyle(() => {
 		return {
@@ -58,7 +75,7 @@ export default function Tile({ x, y, val, size = 80 }) {
 	});
 
 	const deathAnimation = () => {
-		scale = 0;
+		scale.value = 0;
 	};
 
 	return (

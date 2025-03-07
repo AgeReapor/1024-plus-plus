@@ -9,12 +9,14 @@ import GameBoard from "./components/GameBoard.component";
 import * as style from "./utils/StyleUtilClasses";
 
 const CANVAS_SIZE = 350;
+const GRID_SLOTS = 16;
 
 class TileNode {
 	constructor(name, slot, val = 2) {
 		this.name = name;
 		this.slot = slot;
 		this.val = val;
+		this.isAlive = true;
 	}
 }
 
@@ -24,20 +26,87 @@ export default function App() {
 
 	const [tileNodes, setTileNodes] = useState([]);
 
-	const spawnHandler = () => {
-		forceUpdate();
+	const getTileNode = (idx) =>
+		tileNodes.find((tileNode) => tileNode.slot === idx) || null;
+
+	const getEmptySlots = () =>
+		Array.from({ length: GRID_SLOTS }, (_, i) => i).filter(
+			(i) => !tileNodes.find((tileNode) => tileNode.slot === i)
+		);
+
+	const setTileDead = (idx) => {
+		// set specific Tile to isAlive = false using setTileNodes
+		setTileNodes((oldTileNodes) =>
+			oldTileNodes.map((tileNode) =>
+				tileNode.slot === idx
+					? { ...tileNode, isAlive: false }
+					: tileNode
+			)
+		);
+	};
+
+	// Handlers
+
+	const spawnRandomHandler = () => {
+		const emptySlotsCount = getEmptySlots().length;
+		if (emptySlotsCount <= 0) throw new Error("Board is Full");
+
+		const randIdx = Math.floor(Math.random() * emptySlotsCount);
+
+		const idx = getEmptySlots()[randIdx];
+
+		spawnTile(idx);
+
+		// forceUpdate();
 	};
 	const moveHandler = () => {
 		forceUpdate();
 	};
-	const deleteHandler = () => {
+	const deleteRandomHandler = () => {
+		if (tileNodes.length <= 0) throw new Error("Board is Empty");
+
+		const randIdx = Math.floor(Math.random() * tileNodes.length);
+
+		setTileDead(tileNodes[randIdx].slot);
+
 		forceUpdate();
 	};
-	const clearHandler = () => {
-		forceUpdate();
+	const clearHandler = async () => {
+		for (let i = 0; i < GRID_SLOTS; i++) {
+			try {
+				setTileDead(i);
+				await new Promise((resolve) => setTimeout(resolve, 30));
+			} catch (e) {
+				if (e.message === "Board is Empty") break;
+
+				if (e.message === "No Tile Found") continue;
+
+				throw e;
+			}
+		}
 	};
 	const mergeHandler = () => {
 		forceUpdate();
+	};
+
+	const spawnTile = (idx, val = 2) => {
+		if (idx < 0 || idx >= GRID_SLOTS)
+			throw new Error("Invalid Index:" + idx);
+
+		const tileNode = new TileNode("tile_" + idx, idx, val);
+		setTileNodes((oldTileNodes) => [...oldTileNodes, tileNode]);
+	};
+
+	const deleteTile = (idx) => {
+		if (idx < 0 || idx >= GRID_SLOTS)
+			throw new Error("Invalid Index:" + idx);
+
+		const tileNode = getTileNode(idx);
+		if (tileNode === null) throw new Error("No Tile Found");
+
+		setTileNodes((oldTileNodes) =>
+			oldTileNodes.filter((tileNode) => tileNode.slot !== idx)
+		);
 	};
 
 	return (
@@ -50,7 +119,10 @@ export default function App() {
 			]}
 		>
 			<Canvas>
-				<GameBoard tileNodes={tileNodes}></GameBoard>
+				<GameBoard
+					tileNodes={tileNodes}
+					deleteTile={deleteTile}
+				></GameBoard>
 			</Canvas>
 
 			<Animated.View
@@ -61,9 +133,9 @@ export default function App() {
 					stylesheet.toolbar,
 				]}
 			>
-				<Button title="Spawn" onPress={spawnHandler}></Button>
+				<Button title="Spawn" onPress={spawnRandomHandler}></Button>
 				<Button title="Move" onPress={moveHandler}></Button>
-				<Button title="Delete" onPress={deleteHandler}></Button>
+				<Button title="Delete" onPress={deleteRandomHandler}></Button>
 				<Button title="Clear" onPress={clearHandler}></Button>
 				<Button title="Merge" onPress={mergeHandler}></Button>
 			</Animated.View>

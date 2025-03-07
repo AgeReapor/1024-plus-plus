@@ -12,7 +12,7 @@ import calcGridCoords from "../utils/CalcGridCoords";
 const CANVAS_SIZE = 350;
 const GRID_SLOTS = 16;
 
-export default function GameBoard({ tileNodes }) {
+export default function GameBoard({ tileNodes, deleteTile }) {
 	return (
 		<Animated.View style={[stylesheet.gameBoard]}>
 			{tileNodes.map((tileNode) => {
@@ -23,6 +23,8 @@ export default function GameBoard({ tileNodes }) {
 						x={x}
 						y={y}
 						val={tileNode.val}
+						isAlive={tileNode.isAlive}
+						deathCB={() => deleteTile(tileNode.slot)}
 					></Tile>
 				);
 			})}
