@@ -23,6 +23,7 @@ class TileNode {
 export default function App() {
 	const [, updateState] = React.useState();
 	const forceUpdate = React.useCallback(() => updateState({}), []);
+	const idxTracker = React.useRef(0);
 
 	const [tileNodes, setTileNodes] = useState([]);
 
@@ -45,6 +46,29 @@ export default function App() {
 		);
 	};
 
+	const moveTile = (idxFrom, idxTo) => {
+		if (
+			idxFrom < 0 ||
+			idxFrom >= GRID_SLOTS ||
+			idxTo < 0 ||
+			idxTo >= GRID_SLOTS
+		)
+			throw new Error("Invalid Indices: " + idxFrom + ", " + idxTo);
+
+		if (getTileNode(idxFrom) === null) throw new Error("No Tile Found");
+
+		if (getTileNode(idxTo) !== null)
+			throw new Error("Tried moving to Occupied Slot");
+
+		setTileNodes((oldTileNodes) =>
+			oldTileNodes.map((tileNode) =>
+				tileNode.slot === idxFrom
+					? { ...tileNode, slot: idxTo }
+					: tileNode
+			)
+		);
+	};
+
 	// Handlers
 
 	const spawnRandomHandler = () => {
@@ -59,7 +83,15 @@ export default function App() {
 
 		// forceUpdate();
 	};
-	const moveHandler = () => {
+	const moveAllHandler = () => {
+		for (let i = 0; i < GRID_SLOTS; i++) {
+			try {
+				moveTile(i, (i + 1) % GRID_SLOTS);
+			} catch (e) {
+				if (e.message === "No Tile Found") continue;
+			}
+		}
+
 		forceUpdate();
 	};
 	const deleteRandomHandler = () => {
@@ -68,14 +100,13 @@ export default function App() {
 		const randIdx = Math.floor(Math.random() * tileNodes.length);
 
 		setTileDead(tileNodes[randIdx].slot);
-
-		forceUpdate();
 	};
+
 	const clearHandler = async () => {
 		for (let i = 0; i < GRID_SLOTS; i++) {
 			try {
 				setTileDead(i);
-				await new Promise((resolve) => setTimeout(resolve, 30));
+				await new Promise((resolve) => setTimeout(resolve, 10));
 			} catch (e) {
 				if (e.message === "Board is Empty") break;
 
@@ -93,7 +124,7 @@ export default function App() {
 		if (idx < 0 || idx >= GRID_SLOTS)
 			throw new Error("Invalid Index:" + idx);
 
-		const tileNode = new TileNode("tile_" + idx, idx, val);
+		const tileNode = new TileNode("tile_" + idxTracker.current++, idx, val);
 		setTileNodes((oldTileNodes) => [...oldTileNodes, tileNode]);
 	};
 
@@ -134,7 +165,7 @@ export default function App() {
 				]}
 			>
 				<Button title="Spawn" onPress={spawnRandomHandler}></Button>
-				<Button title="Move" onPress={moveHandler}></Button>
+				<Button title="Move" onPress={moveAllHandler}></Button>
 				<Button title="Delete" onPress={deleteRandomHandler}></Button>
 				<Button title="Clear" onPress={clearHandler}></Button>
 				<Button title="Merge" onPress={mergeHandler}></Button>

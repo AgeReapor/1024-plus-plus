@@ -22,6 +22,7 @@ export default function Tile({
 	},
 }) {
 	const scale = useSharedValue(0);
+	let actionInProgress = false;
 
 	// Pulse when value changes
 	useEffect(() => {
