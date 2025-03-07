@@ -28,6 +28,7 @@ const get2or4 = () => (Math.random() < CHANCE_OF_4 ? 4 : 2);
 
 export default function App() {
 	const [, updateState] = React.useState();
+
 	const forceUpdate = React.useCallback(() => updateState({}), []);
 	const idxTracker = React.useRef(0);
 
@@ -185,6 +186,7 @@ export default function App() {
 			.filter((idx) => getTileNode(idx) !== null)
 			.map((idx) => {
 				return {
+					name: getTileNode(idx).name,
 					action: "move",
 					val: getTileNode(idx).val,
 					from: idx,
