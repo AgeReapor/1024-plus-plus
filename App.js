@@ -1,7 +1,9 @@
+import "@expo/metro-runtime";
+
 import Animated from "react-native-reanimated";
 import { Button } from "react-native";
 import { StyleSheet } from "react-native";
-import React, { useState } from "react";
+import React, { useReducer, useState } from "react";
 
 import Canvas from "./components/Canvas";
 import GameBoard from "./components/GameBoard.component";
@@ -117,112 +119,111 @@ export default function App() {
 		}
 	};
 	const mergeHandler = () => {
-		mergeTiles(12, 8);
+		mergeTiles(8, 9, 11);
 	};
 
-	const swipeLeftHandler = () => {
-		let hasAction = false;
-		hasAction ||= swipeLeft(0, 1, 2, 3);
-		hasAction ||= swipeLeft(4, 5, 6, 7);
-		hasAction ||= swipeLeft(8, 9, 10, 11);
-		hasAction ||= swipeLeft(12, 13, 14, 15);
+	const swipeLeftHandler = async () => {
+		const actions = [
+			swipeLeft(0, 1, 2, 3),
+			swipeLeft(4, 5, 6, 7),
+			swipeLeft(8, 9, 10, 11),
+			swipeLeft(12, 13, 14, 15),
+		];
 
-		try {
-			if (hasAction) spawnRandomHandler();
-		} catch (e) {
-			if (e.message !== "Board is Full") throw e;
-			gameOverHandler();
-		}
+		const results = await Promise.all(actions);
+		return results.some((result) => result);
 	};
 
-	const swipeRightHandler = () => {
-		let hasAction = false;
-		hasAction ||= swipeLeft(3, 2, 1, 0);
-		hasAction ||= swipeLeft(7, 6, 5, 4);
-		hasAction ||= swipeLeft(11, 10, 9, 8);
-		hasAction ||= swipeLeft(15, 14, 13, 12);
+	const swipeRightHandler = async () => {
+		const actions = [
+			swipeLeft(3, 2, 1, 0),
+			swipeLeft(7, 6, 5, 4),
+			swipeLeft(11, 10, 9, 8),
+			swipeLeft(15, 14, 13, 12),
+		];
 
-		try {
-			if (hasAction) spawnRandomHandler();
-		} catch (e) {
-			if (e.message !== "Board is Full") throw e;
-			gameOverHandler();
-		}
+		const results = await Promise.all(actions);
+
+		return results.some((result) => result);
 	};
 
-	const swipeUpHandler = () => {
-		let hasAction = false;
-		hasAction ||= swipeLeft(0, 4, 8, 12);
-		hasAction ||= swipeLeft(1, 5, 9, 13);
-		hasAction ||= swipeLeft(2, 6, 10, 14);
-		hasAction ||= swipeLeft(3, 7, 11, 15);
+	const swipeUpHandler = async () => {
+		const actions = [
+			swipeLeft(0, 4, 8, 12),
+			swipeLeft(1, 5, 9, 13),
+			swipeLeft(2, 6, 10, 14),
+			swipeLeft(3, 7, 11, 15),
+		];
 
-		try {
-			if (hasAction) spawnRandomHandler();
-		} catch (e) {
-			if (e.message !== "Board is Full") throw e;
-			gameOverHandler();
-		}
+		const results = await Promise.all(actions);
+
+		return results.some((result) => result);
 	};
 
-	const swipeDownHandler = () => {
-		let hasAction = false;
-		hasAction ||= swipeLeft(12, 8, 4, 0);
-		hasAction ||= swipeLeft(13, 9, 5, 1);
-		hasAction ||= swipeLeft(14, 10, 6, 2);
-		hasAction ||= swipeLeft(15, 11, 7, 3);
+	const swipeDownHandler = async () => {
+		const actions = [
+			swipeLeft(12, 8, 4, 0),
+			swipeLeft(13, 9, 5, 1),
+			swipeLeft(14, 10, 6, 2),
+			swipeLeft(15, 11, 7, 3),
+		];
 
-		try {
-			if (hasAction) spawnRandomHandler();
-		} catch (e) {
-			if (e.message !== "Board is Full") throw e;
-			gameOverHandler();
-		}
+		const results = await Promise.all(actions);
+
+		return results.some((result) => result);
 	};
 
 	//  Board Actions
 
 	// TODO: Fix this buggy shit
-	const swipeLeft = (idx1, idx2, idx3, idx4) => {
+	const swipeLeft = async (idx1, idx2, idx3, idx4) => {
 		const indices = [idx1, idx2, idx3, idx4];
 
 		let hasAction = false;
 
-		// for (let cur = 0; cur < 4; cur++) {
-		// 	// i = 0, max of 4
-		// 	// pick i, if empty find next non-empty tile j and try to move j to i, pick i+1
-		// 	if (getTileNode(indices[cur]) === null) {
-		// 		for (let next = cur + 1; next < 4; next++) {
-		// 			if (getTileNode(indices[next]) !== null) {
-		// 				moveTile(indices[next], indices[cur]);
-		// 				hasAction = true;
-		// 				break;
-		// 			}
-		// 		}
+		let actions = indices
+			.filter((idx) => getTileNode(idx) !== null)
+			.map((idx) => {
+				return {
+					action: "move",
+					val: getTileNode(idx).val,
+					from: idx,
+				};
+			})
+			.reduce((acc, curr) => {
+				let last = acc[acc.length - 1];
+				if (last && last.action === "move" && last.val === curr.val) {
+					last.with = curr.from;
+					last.action = "merge";
+					last.val += curr.val;
+					return acc;
+				} else {
+					acc.push(curr);
+				}
+				return acc;
+			}, []);
 
-		// 		// pick i, if not empty find next non-empty tile j,
-		// 		// 		if same value merge j to i, pick i+1
-		// 		// 		else move j to i + 1, pick i+2
-		// 	} else {
-		// 		let val = getTileNode(indices[cur]).val;
-		// 		for (let next = cur + 1; next < 4; next++) {
-		// 			if (getTileNode(indices[next]) === null) continue;
-		// 			if (getTileNode(indices[next]).val === val) {
-		// 				mergeTiles(indices[next], indices[cur]);
-		// 				val = getTileNode(indices[cur]).val;
-		// 				hasAction = true;
-		// 				break;
-		// 			} else {
-		// 				moveTile(indices[next], indices[cur + 1]);
-		// 				cur++;
-		// 				hasAction = true;
-		// 				break;
-		// 			}
-		// 		}
-		// 	}
-		// }
+		for (let i = 0; i < actions.length; i++) {
+			if (actions[i].action === "move") {
+				const fromIdx = actions[i].from;
+				const toIdx = indices[i];
 
-		return hasAction;
+				if (fromIdx === toIdx) continue;
+
+				moveTile(fromIdx, toIdx);
+				hasAction = true;
+			} else if (actions[i].action === "merge") {
+				const fromIdx = actions[i].from;
+				const toIdx = indices[i];
+				const withIdx = actions[i].with;
+
+				mergeTiles(fromIdx, withIdx, toIdx);
+				hasAction = true;
+			}
+		}
+
+		console.log(actions);
+		return false;
 	};
 
 	const spawnTile = (idx, val = 2) => {
@@ -270,35 +271,49 @@ export default function App() {
 		);
 	};
 
-	const mergeTiles = (idxFrom, idxTo, newVal = null) => {
+	const mergeTiles = (idxFrom, idxWith, idxTo, newVal = null) => {
 		if (
 			idxFrom < 0 ||
 			idxFrom >= GRID_SLOTS ||
-			idxTo < 0 ||
-			idxTo >= GRID_SLOTS
+			idxWith < 0 ||
+			idxWith >= GRID_SLOTS
 		)
 			throw new Error("Invalid Indices: " + idxFrom + ", " + idxTo);
 
 		const tileNodeFrom = getTileNode(idxFrom);
-		const tileNodeTo = getTileNode(idxTo);
+		const tileNodeWith = getTileNode(idxWith);
 
 		if (tileNodeFrom === null)
-			throw new Error("Tried merging with an empty tile");
-		if (tileNodeTo === null)
-			throw new Error("Tried merging to an empty tile");
-		if (tileNodeFrom.val !== tileNodeTo.val)
-			throw new Error("Tried merging tiles with different values");
+			throw new Error(
+				"Tried merging with an empty tile:" +
+					idxFrom +
+					", " +
+					idxWith +
+					", " +
+					idxTo
+			);
+		if (tileNodeWith === null)
+			throw new Error(
+				"Tried merging to an empty tile:" +
+					idxFrom +
+					", " +
+					idxWith +
+					", " +
+					idxTo
+			);
+		// if (tileNodeFrom.val !== tileNodeTo.val)
+		// 	throw new Error("Tried merging tiles with different values");
 
 		const nameFrom = tileNodeFrom.name;
-		const nameTo = tileNodeTo.name;
-		const sum = newVal || tileNodeFrom.val * 2;
+		const nameWith = tileNodeWith.name;
+		const sum = newVal || tileNodeFrom.val + tileNodeWith.val;
 
 		setTileNodes((oldTileNodes) =>
 			oldTileNodes.map((tileNode) => {
 				if (tileNode.name === nameFrom)
 					return { ...tileNode, isAlive: false };
-				else if (tileNode.name === nameTo)
-					return { ...tileNode, val: sum };
+				else if (tileNode.name === nameWith)
+					return { ...tileNode, slot: idxTo, val: sum };
 				else return tileNode;
 			})
 		);
