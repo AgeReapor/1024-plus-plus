@@ -85,7 +85,10 @@ export default function App() {
 	const spawnRandomHandler = (val = null) => {
 		const emptySlotsCount = getEmptySlots().length;
 		// if (emptySlotsCount <= 0) throw new Error("Board is Full");
-		if (emptySlotsCount <= 0) setGameOver(true);
+		if (emptySlotsCount <= 0) {
+			setGameOver(true);
+			return;
+		}
 
 		const randIdx = Math.floor(Math.random() * emptySlotsCount);
 
@@ -396,10 +399,6 @@ export default function App() {
 		</Animated.View>
 	);
 }
-
-const gameOverHandler = () => {
-	setGameOver(true);
-};
 
 const stylesheet = StyleSheet.create({
 	canvas: {
