@@ -3,7 +3,7 @@ import "@expo/metro-runtime";
 import Animated from "react-native-reanimated";
 import { Button } from "react-native";
 import { StyleSheet } from "react-native";
-import React, { useReducer, useState } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 
 import Canvas from "./components/Canvas";
 import GameBoard from "./components/GameBoard.component";
@@ -13,7 +13,8 @@ import * as style from "./utils/StyleUtilClasses";
 const CANVAS_SIZE = 350;
 const GRID_SLOTS = 16;
 
-const CHANCE_OF_4 = 0.2;
+const CHANCE_OF_4 = 0.1;
+const SPAWN_TIME = 200;
 
 class TileNode {
 	constructor(name, slot, val = 2) {
@@ -28,6 +29,10 @@ const get2or4 = () => (Math.random() < CHANCE_OF_4 ? 4 : 2);
 
 export default function App() {
 	const [, updateState] = React.useState();
+
+	useEffect(() => {
+		spawnRandomHandler(2);
+	}, []);
 
 	const forceUpdate = React.useCallback(() => updateState({}), []);
 	const idxTracker = React.useRef(0);
@@ -74,7 +79,7 @@ export default function App() {
 
 	// Handlers
 
-	const spawnRandomHandler = (val = 2) => {
+	const spawnRandomHandler = (val = null) => {
 		const emptySlotsCount = getEmptySlots().length;
 		if (emptySlotsCount <= 0) throw new Error("Board is Full");
 
@@ -82,21 +87,12 @@ export default function App() {
 
 		const idx = getEmptySlots()[randIdx];
 
-		spawnTile(idx, get2or4());
+		if (val !== null) spawnTile(idx, val);
+		else spawnTile(idx, get2or4());
 
 		// forceUpdate();
 	};
-	const moveAllHandler = () => {
-		for (let i = 0; i < GRID_SLOTS; i++) {
-			try {
-				moveTile(i, (i + 1) % GRID_SLOTS);
-			} catch (e) {
-				if (e.message === "No Tile Found") continue;
-			}
-		}
 
-		forceUpdate();
-	};
 	const deleteRandomHandler = () => {
 		if (tileNodes.length <= 0) throw new Error("Board is Empty");
 
@@ -119,68 +115,71 @@ export default function App() {
 			}
 		}
 	};
+
+	const moveAllHandler = () => {
+		for (let i = 0; i < GRID_SLOTS; i++) {
+			try {
+				moveTile(i, (i + 1) % GRID_SLOTS);
+			} catch (e) {
+				if (e.message === "No Tile Found") continue;
+			}
+		}
+
+		forceUpdate();
+	};
 	const mergeHandler = () => {
 		mergeTiles(8, 9, 11);
 	};
 
-	const swipeLeftHandler = async () => {
-		const actions = [
+	const swipeLeftHandler = () => {
+		let newTileNodes = [
 			swipeLeft(0, 1, 2, 3),
 			swipeLeft(4, 5, 6, 7),
 			swipeLeft(8, 9, 10, 11),
 			swipeLeft(12, 13, 14, 15),
-		];
+		].flat();
 
-		const results = await Promise.all(actions);
-		return results.some((result) => result);
+		setTileNodes(newTileNodes);
 	};
 
-	const swipeRightHandler = async () => {
-		const actions = [
+	const swipeRightHandler = () => {
+		let newTileNodes = [
 			swipeLeft(3, 2, 1, 0),
 			swipeLeft(7, 6, 5, 4),
 			swipeLeft(11, 10, 9, 8),
 			swipeLeft(15, 14, 13, 12),
-		];
+		].flat();
 
-		const results = await Promise.all(actions);
-
-		return results.some((result) => result);
+		setTileNodes(newTileNodes);
 	};
 
-	const swipeUpHandler = async () => {
-		const actions = [
+	const swipeUpHandler = () => {
+		let newTileNodes = [
 			swipeLeft(0, 4, 8, 12),
 			swipeLeft(1, 5, 9, 13),
 			swipeLeft(2, 6, 10, 14),
 			swipeLeft(3, 7, 11, 15),
-		];
+		].flat();
 
-		const results = await Promise.all(actions);
-
-		return results.some((result) => result);
+		setTileNodes(newTileNodes);
 	};
 
-	const swipeDownHandler = async () => {
-		const actions = [
+	const swipeDownHandler = () => {
+		let newTileNodes = [
 			swipeLeft(12, 8, 4, 0),
 			swipeLeft(13, 9, 5, 1),
 			swipeLeft(14, 10, 6, 2),
 			swipeLeft(15, 11, 7, 3),
-		];
+		].flat();
 
-		const results = await Promise.all(actions);
-
-		return results.some((result) => result);
+		setTileNodes(newTileNodes);
 	};
 
 	//  Board Actions
 
 	// TODO: Fix this buggy shit
-	const swipeLeft = async (idx1, idx2, idx3, idx4) => {
+	const swipeLeft = (idx1, idx2, idx3, idx4) => {
 		const indices = [idx1, idx2, idx3, idx4];
-
-		let hasAction = false;
 
 		let actions = indices
 			.filter((idx) => getTileNode(idx) !== null)
@@ -206,26 +205,15 @@ export default function App() {
 			}, []);
 
 		for (let i = 0; i < actions.length; i++) {
-			if (actions[i].action === "move") {
-				const fromIdx = actions[i].from;
-				const toIdx = indices[i];
-
-				if (fromIdx === toIdx) continue;
-
-				moveTile(fromIdx, toIdx);
-				hasAction = true;
-			} else if (actions[i].action === "merge") {
-				const fromIdx = actions[i].from;
-				const toIdx = indices[i];
-				const withIdx = actions[i].with;
-
-				mergeTiles(fromIdx, withIdx, toIdx);
-				hasAction = true;
-			}
+			actions[i].to = indices[i];
 		}
 
-		console.log(actions);
-		return false;
+		// turn actions to tilenodes
+		let newTilenodes = actions.map((action) => {
+			return new TileNode(action.name, action.to, action.val, true);
+		});
+
+		return newTilenodes;
 	};
 
 	const spawnTile = (idx, val = 2) => {
@@ -344,11 +332,16 @@ export default function App() {
 					stylesheet.toolbar,
 				]}
 			>
-				<Button title="Spawn" onPress={spawnRandomHandler}></Button>
-				<Button title="Move" onPress={moveAllHandler}></Button>
-				<Button title="Delete" onPress={deleteRandomHandler}></Button>
-				<Button title="Clear" onPress={clearHandler}></Button>
-				<Button title="Merge" onPress={mergeHandler}></Button>
+				<Button
+					title="Spawn Random"
+					onPress={spawnRandomHandler}
+				></Button>
+				<Button title="Move All" onPress={moveAllHandler}></Button>
+				<Button
+					title="Delete Random"
+					onPress={deleteRandomHandler}
+				></Button>
+				<Button title="Clear All" onPress={clearHandler}></Button>
 			</Animated.View>
 			<Animated.View
 				style={[
@@ -358,10 +351,35 @@ export default function App() {
 					stylesheet.toolbar,
 				]}
 			>
-				<Button title="Left" onPress={swipeLeftHandler}></Button>
-				<Button title="Right" onPress={swipeRightHandler}></Button>
-				<Button title="Up" onPress={swipeUpHandler}></Button>
-				<Button title="Down" onPress={swipeDownHandler}></Button>
+				<Button
+					title="Left"
+					onPress={async () => {
+						swipeLeftHandler();
+						setTimeout(spawnRandomHandler, SPAWN_TIME);
+					}}
+				></Button>
+				<Button
+					title="Up"
+					onPress={async () => {
+						swipeUpHandler();
+						setTimeout(spawnRandomHandler, SPAWN_TIME);
+					}}
+				></Button>
+				<Button
+					title="Down"
+					o
+					onPress={async () => {
+						swipeDownHandler();
+						setTimeout(spawnRandomHandler, SPAWN_TIME);
+					}}
+				></Button>
+				<Button
+					title="Right"
+					onPress={async () => {
+						swipeRightHandler();
+						setTimeout(spawnRandomHandler, SPAWN_TIME);
+					}}
+				></Button>
 			</Animated.View>
 		</Animated.View>
 	);
