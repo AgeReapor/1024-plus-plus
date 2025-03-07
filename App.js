@@ -118,13 +118,53 @@ export default function App() {
 
 	const swipeLeftHandler = () => {
 		swipeLeft(0, 1, 2, 3);
+		swipeLeft(4, 5, 6, 7);
+		swipeLeft(8, 9, 10, 11);
+		swipeLeft(12, 13, 14, 15);
+	};
+
+	const swipeRightHandler = () => {
+		swipeLeft(3, 2, 1, 0);
+		swipeLeft(7, 6, 5, 4);
+		swipeLeft(11, 10, 9, 8);
+		swipeLeft(15, 14, 13, 12);
+	};
+
+	const swipeUpHandler = () => {
+		swipeLeft(0, 4, 8, 12);
+		swipeLeft(1, 5, 9, 13);
+		swipeLeft(2, 6, 10, 14);
+		swipeLeft(3, 7, 11, 15);
+	};
+
+	const swipeDownHandler = () => {
+		swipeLeft(12, 8, 4, 0);
+		swipeLeft(13, 9, 5, 1);
+		swipeLeft(14, 10, 6, 2);
+		swipeLeft(15, 11, 7, 3);
 	};
 
 	//  Board Actions
 
+	// TODO: Fix this buggy shit
 	const swipeLeft = (idx1, idx2, idx3, idx4) => {
 		const indices = [idx1, idx2, idx3, idx4];
-		const swipedPtr = 0;
+
+		for (let i = 0; i < 4; i++) {
+			for (let j = i + 1; j < 4; j++) {
+				if (getTileNode(indices[j]) === null) continue;
+
+				try {
+					mergeTiles(indices[j], indices[i]);
+					continue;
+				} catch (e) {}
+
+				try {
+					moveTile(indices[j], indices[i]);
+					continue;
+				} catch (e) {}
+			}
+		}
 	};
 
 	const spawnTile = (idx, val = 2) => {
@@ -155,6 +195,8 @@ export default function App() {
 			idxTo >= GRID_SLOTS
 		)
 			throw new Error("Invalid Indices: " + idxFrom + ", " + idxTo);
+
+		if (idxFrom === idxTo) return;
 
 		if (getTileNode(idxFrom) === null) throw new Error("No Tile Found");
 
@@ -232,7 +274,7 @@ export default function App() {
 				<Button title="Delete" onPress={deleteRandomHandler}></Button>
 				<Button title="Clear" onPress={clearHandler}></Button>
 				<Button title="Merge" onPress={mergeHandler}></Button>
-			</Animated.View>{" "}
+			</Animated.View>
 			<Animated.View
 				style={[
 					style.flex_center,
@@ -241,7 +283,10 @@ export default function App() {
 					stylesheet.toolbar,
 				]}
 			>
-				<Button title="Swipe Left" onPress={swipeLeftHandler}></Button>
+				<Button title="Left" onPress={swipeLeftHandler}></Button>
+				<Button title="Right" onPress={swipeRightHandler}></Button>
+				<Button title="Up" onPress={swipeUpHandler}></Button>
+				<Button title="Down" onPress={swipeDownHandler}></Button>
 			</Animated.View>
 		</Animated.View>
 	);
