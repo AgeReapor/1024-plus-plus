@@ -9,6 +9,7 @@ import Canvas from "./components/Canvas";
 import GameBoard from "./components/GameBoard.component";
 
 import * as style from "./utils/StyleUtilClasses";
+import GameOverModal from "./components/GameOverModal";
 
 const CANVAS_SIZE = 350;
 const GRID_SLOTS = 16;
@@ -28,16 +29,18 @@ class TileNode {
 const get2or4 = () => (Math.random() < CHANCE_OF_4 ? 4 : 2);
 
 export default function App() {
+	const [tileNodes, setTileNodes] = useState([]);
+
+	const idxTracker = React.useRef(0);
+
 	const [, updateState] = React.useState();
+	const forceUpdate = React.useCallback(() => updateState({}), []);
+
+	const [gameOver, setGameOver] = useState(false);
 
 	useEffect(() => {
 		spawnRandomHandler(2);
 	}, []);
-
-	const forceUpdate = React.useCallback(() => updateState({}), []);
-	const idxTracker = React.useRef(0);
-
-	const [tileNodes, setTileNodes] = useState([]);
 
 	//  Derived Values
 	const getTileNode = (idx) =>
@@ -81,13 +84,14 @@ export default function App() {
 
 	const spawnRandomHandler = (val = null) => {
 		const emptySlotsCount = getEmptySlots().length;
-		if (emptySlotsCount <= 0) throw new Error("Board is Full");
+		// if (emptySlotsCount <= 0) throw new Error("Board is Full");
+		if (emptySlotsCount <= 0) setGameOver(true);
 
 		const randIdx = Math.floor(Math.random() * emptySlotsCount);
 
 		const idx = getEmptySlots()[randIdx];
 
-		if (val !== null) spawnTile(idx, val);
+		if (val === null) spawnTile(idx, val);
 		else spawnTile(idx, get2or4());
 
 		// forceUpdate();
@@ -381,12 +385,20 @@ export default function App() {
 					}}
 				></Button>
 			</Animated.View>
+			{gameOver && (
+				<GameOverModal
+					restartHandler={() => {
+						setGameOver(false);
+						clearHandler();
+					}}
+				></GameOverModal>
+			)}
 		</Animated.View>
 	);
 }
 
 const gameOverHandler = () => {
-	console.log("Game Over Modal should appear here");
+	setGameOver(true);
 };
 
 const stylesheet = StyleSheet.create({

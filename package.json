@@ -20,6 +20,7 @@
 		"android": "expo start --android",
 		"a": "expo start --android",
 		"ios": "expo start --ios",
-		"web": "expo start --web"
+		"web": "expo start --web",
+		"w": "expo start --web"
 	}
 }
