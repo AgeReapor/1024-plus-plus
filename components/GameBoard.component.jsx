@@ -1,9 +1,5 @@
-import Animated, {
-	useDerivedValue,
-	useSharedValue,
-} from "react-native-reanimated";
+import Animated, { useSharedValue } from "react-native-reanimated";
 import { StyleSheet } from "react-native";
-import { useEffect, useState } from "react";
 
 import Tile from "./Tile.component";
 
@@ -12,7 +8,7 @@ import calcGridCoords from "../utils/CalcGridCoords";
 const CANVAS_SIZE = 350;
 const GRID_SLOTS = 16;
 
-export default function GameBoard({ tileNodes, deleteTile }) {
+export default function GameBoard({ tileNodes, deleteTileFactory }) {
 	return (
 		<Animated.View style={[stylesheet.gameBoard]}>
 			{tileNodes.map((tileNode) => {
@@ -24,7 +20,9 @@ export default function GameBoard({ tileNodes, deleteTile }) {
 						y={y}
 						val={tileNode.val}
 						isAlive={tileNode.isAlive}
-						deathCB={() => deleteTile(tileNode.slot)}
+						deathCB={() => {
+							deleteTileFactory(tileNode.slot);
+						}}
 					></Tile>
 				);
 			})}

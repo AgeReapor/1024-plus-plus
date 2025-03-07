@@ -27,6 +27,7 @@ export default function App() {
 
 	const [tileNodes, setTileNodes] = useState([]);
 
+	//  Derived Values
 	const getTileNode = (idx) =>
 		tileNodes.find((tileNode) => tileNode.slot === idx) || null;
 
@@ -35,8 +36,8 @@ export default function App() {
 			(i) => !tileNodes.find((tileNode) => tileNode.slot === i)
 		);
 
+	// Board Setters
 	const setTileDead = (idx) => {
-		// set specific Tile to isAlive = false using setTileNodes
 		setTileNodes((oldTileNodes) =>
 			oldTileNodes.map((tileNode) =>
 				tileNode.slot === idx
@@ -46,25 +47,20 @@ export default function App() {
 		);
 	};
 
-	const moveTile = (idxFrom, idxTo) => {
-		if (
-			idxFrom < 0 ||
-			idxFrom >= GRID_SLOTS ||
-			idxTo < 0 ||
-			idxTo >= GRID_SLOTS
-		)
-			throw new Error("Invalid Indices: " + idxFrom + ", " + idxTo);
-
-		if (getTileNode(idxFrom) === null) throw new Error("No Tile Found");
-
-		if (getTileNode(idxTo) !== null)
-			throw new Error("Tried moving to Occupied Slot");
-
+	const setTileDeadByName = (name) => {
 		setTileNodes((oldTileNodes) =>
 			oldTileNodes.map((tileNode) =>
-				tileNode.slot === idxFrom
-					? { ...tileNode, slot: idxTo }
+				tileNode.name === name
+					? { ...tileNode, isAlive: false }
 					: tileNode
+			)
+		);
+	};
+
+	const setTileVal = (idx, val) => {
+		setTileNodes((oldTileNodes) =>
+			oldTileNodes.map((tileNode) =>
+				tileNode.slot === idx ? { ...tileNode, val } : tileNode
 			)
 		);
 	};
@@ -117,7 +113,18 @@ export default function App() {
 		}
 	};
 	const mergeHandler = () => {
-		forceUpdate();
+		mergeTiles(12, 8);
+	};
+
+	const swipeLeftHandler = () => {
+		swipeLeft(0, 1, 2, 3);
+	};
+
+	//  Board Actions
+
+	const swipeLeft = (idx1, idx2, idx3, idx4) => {
+		const indices = [idx1, idx2, idx3, idx4];
+		const swipedPtr = 0;
 	};
 
 	const spawnTile = (idx, val = 2) => {
@@ -128,7 +135,7 @@ export default function App() {
 		setTileNodes((oldTileNodes) => [...oldTileNodes, tileNode]);
 	};
 
-	const deleteTile = (idx) => {
+	const deleteTileFactory = (idx) => {
 		if (idx < 0 || idx >= GRID_SLOTS)
 			throw new Error("Invalid Index:" + idx);
 
@@ -137,6 +144,63 @@ export default function App() {
 
 		setTileNodes((oldTileNodes) =>
 			oldTileNodes.filter((tileNode) => tileNode.slot !== idx)
+		);
+	};
+
+	const moveTile = (idxFrom, idxTo) => {
+		if (
+			idxFrom < 0 ||
+			idxFrom >= GRID_SLOTS ||
+			idxTo < 0 ||
+			idxTo >= GRID_SLOTS
+		)
+			throw new Error("Invalid Indices: " + idxFrom + ", " + idxTo);
+
+		if (getTileNode(idxFrom) === null) throw new Error("No Tile Found");
+
+		if (getTileNode(idxTo) !== null)
+			throw new Error("Tried moving to Occupied Slot");
+
+		setTileNodes((oldTileNodes) =>
+			oldTileNodes.map((tileNode) =>
+				tileNode.slot === idxFrom
+					? { ...tileNode, slot: idxTo }
+					: tileNode
+			)
+		);
+	};
+
+	const mergeTiles = (idxFrom, idxTo, newVal = null) => {
+		if (
+			idxFrom < 0 ||
+			idxFrom >= GRID_SLOTS ||
+			idxTo < 0 ||
+			idxTo >= GRID_SLOTS
+		)
+			throw new Error("Invalid Indices: " + idxFrom + ", " + idxTo);
+
+		const tileNodeFrom = getTileNode(idxFrom);
+		const tileNodeTo = getTileNode(idxTo);
+
+		if (tileNodeFrom === null)
+			throw new Error("Tried merging with an empty tile");
+		if (tileNodeTo === null)
+			throw new Error("Tried merging to an empty tile");
+		if (tileNodeFrom.val !== tileNodeTo.val)
+			throw new Error("Tried merging tiles with different values");
+
+		const nameFrom = tileNodeFrom.name;
+		const nameTo = tileNodeTo.name;
+		const sum = newVal || tileNodeFrom.val * 2;
+
+		setTileNodes((oldTileNodes) =>
+			oldTileNodes.map((tileNode) => {
+				if (tileNode.name === nameFrom)
+					return { ...tileNode, isAlive: false };
+				else if (tileNode.name === nameTo)
+					return { ...tileNode, val: sum };
+				else return tileNode;
+			})
 		);
 	};
 
@@ -152,10 +216,9 @@ export default function App() {
 			<Canvas>
 				<GameBoard
 					tileNodes={tileNodes}
-					deleteTile={deleteTile}
+					deleteTileFactory={deleteTileFactory}
 				></GameBoard>
 			</Canvas>
-
 			<Animated.View
 				style={[
 					style.flex_center,
@@ -169,6 +232,16 @@ export default function App() {
 				<Button title="Delete" onPress={deleteRandomHandler}></Button>
 				<Button title="Clear" onPress={clearHandler}></Button>
 				<Button title="Merge" onPress={mergeHandler}></Button>
+			</Animated.View>{" "}
+			<Animated.View
+				style={[
+					style.flex_center,
+					style.flex_row,
+					style.gap(),
+					stylesheet.toolbar,
+				]}
+			>
+				<Button title="Swipe Left" onPress={swipeLeftHandler}></Button>
 			</Animated.View>
 		</Animated.View>
 	);
