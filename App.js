@@ -11,6 +11,8 @@ import * as style from "./utils/StyleUtilClasses";
 const CANVAS_SIZE = 350;
 const GRID_SLOTS = 16;
 
+const CHANCE_OF_4 = 0.2;
+
 class TileNode {
 	constructor(name, slot, val = 2) {
 		this.name = name;
@@ -19,6 +21,8 @@ class TileNode {
 		this.isAlive = true;
 	}
 }
+
+const get2or4 = () => (Math.random() < CHANCE_OF_4 ? 4 : 2);
 
 export default function App() {
 	const [, updateState] = React.useState();
@@ -67,7 +71,7 @@ export default function App() {
 
 	// Handlers
 
-	const spawnRandomHandler = () => {
+	const spawnRandomHandler = (val = 2) => {
 		const emptySlotsCount = getEmptySlots().length;
 		if (emptySlotsCount <= 0) throw new Error("Board is Full");
 
@@ -75,7 +79,7 @@ export default function App() {
 
 		const idx = getEmptySlots()[randIdx];
 
-		spawnTile(idx);
+		spawnTile(idx, get2or4());
 
 		// forceUpdate();
 	};
@@ -117,31 +121,63 @@ export default function App() {
 	};
 
 	const swipeLeftHandler = () => {
-		swipeLeft(0, 1, 2, 3);
-		swipeLeft(4, 5, 6, 7);
-		swipeLeft(8, 9, 10, 11);
-		swipeLeft(12, 13, 14, 15);
+		let hasAction = false;
+		hasAction ||= swipeLeft(0, 1, 2, 3);
+		hasAction ||= swipeLeft(4, 5, 6, 7);
+		hasAction ||= swipeLeft(8, 9, 10, 11);
+		hasAction ||= swipeLeft(12, 13, 14, 15);
+
+		try {
+			if (hasAction) spawnRandomHandler();
+		} catch (e) {
+			if (e.message !== "Board is Full") throw e;
+			gameOverHandler();
+		}
 	};
 
 	const swipeRightHandler = () => {
-		swipeLeft(3, 2, 1, 0);
-		swipeLeft(7, 6, 5, 4);
-		swipeLeft(11, 10, 9, 8);
-		swipeLeft(15, 14, 13, 12);
+		let hasAction = false;
+		hasAction ||= swipeLeft(3, 2, 1, 0);
+		hasAction ||= swipeLeft(7, 6, 5, 4);
+		hasAction ||= swipeLeft(11, 10, 9, 8);
+		hasAction ||= swipeLeft(15, 14, 13, 12);
+
+		try {
+			if (hasAction) spawnRandomHandler();
+		} catch (e) {
+			if (e.message !== "Board is Full") throw e;
+			gameOverHandler();
+		}
 	};
 
 	const swipeUpHandler = () => {
-		swipeLeft(0, 4, 8, 12);
-		swipeLeft(1, 5, 9, 13);
-		swipeLeft(2, 6, 10, 14);
-		swipeLeft(3, 7, 11, 15);
+		let hasAction = false;
+		hasAction ||= swipeLeft(0, 4, 8, 12);
+		hasAction ||= swipeLeft(1, 5, 9, 13);
+		hasAction ||= swipeLeft(2, 6, 10, 14);
+		hasAction ||= swipeLeft(3, 7, 11, 15);
+
+		try {
+			if (hasAction) spawnRandomHandler();
+		} catch (e) {
+			if (e.message !== "Board is Full") throw e;
+			gameOverHandler();
+		}
 	};
 
 	const swipeDownHandler = () => {
-		swipeLeft(12, 8, 4, 0);
-		swipeLeft(13, 9, 5, 1);
-		swipeLeft(14, 10, 6, 2);
-		swipeLeft(15, 11, 7, 3);
+		let hasAction = false;
+		hasAction ||= swipeLeft(12, 8, 4, 0);
+		hasAction ||= swipeLeft(13, 9, 5, 1);
+		hasAction ||= swipeLeft(14, 10, 6, 2);
+		hasAction ||= swipeLeft(15, 11, 7, 3);
+
+		try {
+			if (hasAction) spawnRandomHandler();
+		} catch (e) {
+			if (e.message !== "Board is Full") throw e;
+			gameOverHandler();
+		}
 	};
 
 	//  Board Actions
@@ -150,21 +186,43 @@ export default function App() {
 	const swipeLeft = (idx1, idx2, idx3, idx4) => {
 		const indices = [idx1, idx2, idx3, idx4];
 
-		for (let i = 0; i < 4; i++) {
-			for (let j = i + 1; j < 4; j++) {
-				if (getTileNode(indices[j]) === null) continue;
+		let hasAction = false;
 
-				try {
-					mergeTiles(indices[j], indices[i]);
-					continue;
-				} catch (e) {}
+		// for (let cur = 0; cur < 4; cur++) {
+		// 	// i = 0, max of 4
+		// 	// pick i, if empty find next non-empty tile j and try to move j to i, pick i+1
+		// 	if (getTileNode(indices[cur]) === null) {
+		// 		for (let next = cur + 1; next < 4; next++) {
+		// 			if (getTileNode(indices[next]) !== null) {
+		// 				moveTile(indices[next], indices[cur]);
+		// 				hasAction = true;
+		// 				break;
+		// 			}
+		// 		}
 
-				try {
-					moveTile(indices[j], indices[i]);
-					continue;
-				} catch (e) {}
-			}
-		}
+		// 		// pick i, if not empty find next non-empty tile j,
+		// 		// 		if same value merge j to i, pick i+1
+		// 		// 		else move j to i + 1, pick i+2
+		// 	} else {
+		// 		let val = getTileNode(indices[cur]).val;
+		// 		for (let next = cur + 1; next < 4; next++) {
+		// 			if (getTileNode(indices[next]) === null) continue;
+		// 			if (getTileNode(indices[next]).val === val) {
+		// 				mergeTiles(indices[next], indices[cur]);
+		// 				val = getTileNode(indices[cur]).val;
+		// 				hasAction = true;
+		// 				break;
+		// 			} else {
+		// 				moveTile(indices[next], indices[cur + 1]);
+		// 				cur++;
+		// 				hasAction = true;
+		// 				break;
+		// 			}
+		// 		}
+		// 	}
+		// }
+
+		return hasAction;
 	};
 
 	const spawnTile = (idx, val = 2) => {
@@ -292,8 +350,8 @@ export default function App() {
 	);
 }
 
-const fullBoardHandler = () => {
-	console.log("Modal Should Appear Here");
+const gameOverHandler = () => {
+	console.log("Game Over Modal should appear here");
 };
 
 const stylesheet = StyleSheet.create({
